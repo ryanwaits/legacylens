@@ -73,6 +73,15 @@ legacylens docs DGESV --codebase lapack
 legacylens docs CFE_ES_Main --codebase cfs
 ```
 
+### `view` — View full source code
+
+Look up a function by name and display its full source with syntax highlighting. Useful for drilling down after a query or explain.
+
+```bash
+legacylens view DGESV --codebase lapack
+legacylens view CFE_ES_Main --codebase cfs
+```
+
 ### `examples` — Quick reference
 
 Prints example queries for every command.
@@ -95,6 +104,13 @@ All query commands accept:
 2. **LLM reranking** — Claude scores and selects the most relevant code chunks
 3. **Structured generation** — Claude generates formatted responses with source citations
 4. **Rich rendering** — syntax-highlighted code, styled tables, colored headers in your terminal
+5. **Relevance scores** — each source citation shows its relevance rating (0-10)
+
+## Documentation
+
+- [Pre-Search Analysis](./PRESEARCH.md) — architecture decisions made before coding
+- [RAG Architecture](./RAG_ARCHITECTURE.md) — vector DB, chunking, retrieval pipeline, failure modes
+- [AI Cost Analysis](./AI_COST_ANALYSIS.md) — development spend + production projections
 
 ## Development
 
