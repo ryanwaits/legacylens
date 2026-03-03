@@ -16,7 +16,7 @@ program
   .description(
     "RAG-powered CLI for understanding legacy codebases (LAPACK + NASA cFS)"
   )
-  .version("0.1.0");
+  .version("0.2.0");
 
 program
   .command("init")
