@@ -45,11 +45,14 @@ export async function streamResponse(
 
   process.stdout.write(renderMarkdown(fullText));
 
-  // Citations footer
-  const sources = chunks
-    .map((c) => `${c.file_path}:${c.line_start}-${c.line_end}`)
-    .join(", ");
-  process.stdout.write(chalk.dim(`📎 Sources: ${sources}\n`));
+  // Citations footer with relevance scores
+  process.stdout.write(chalk.dim("📎 Sources:\n"));
+  for (const c of chunks) {
+    const score = c.score != null ? chalk.dim(` [${c.score.toFixed(1)}/10]`) : "";
+    process.stdout.write(
+      chalk.dim(`   • ${c.file_path}:${c.line_start}-${c.line_end}`) + score + "\n"
+    );
+  }
 
   return fullText;
 }
