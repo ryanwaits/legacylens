@@ -21,6 +21,10 @@ ${chalk.bold("Patterns")} — find architectural patterns
 ${chalk.bold("Docs")} — generate markdown documentation
   ${chalk.dim("$")} legacylens docs DGESV --codebase lapack
   ${chalk.dim("$")} legacylens docs CFE_ES_Main --codebase cfs
+
+${chalk.bold("View")} — view full source code of a function
+  ${chalk.dim("$")} legacylens view DGESV --codebase lapack
+  ${chalk.dim("$")} legacylens view CFE_ES_Main --codebase cfs
 `.trimStart();
 
 export function examplesCommand(): void {

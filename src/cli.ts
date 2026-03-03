@@ -7,6 +7,7 @@ import { depsCommand } from "./commands/deps.ts";
 import { patternsCommand } from "./commands/patterns.ts";
 import { docsCommand } from "./commands/docs.ts";
 import { examplesCommand } from "./commands/examples.ts";
+import { viewCommand } from "./commands/view.ts";
 
 const program = new Command();
 
@@ -51,6 +52,12 @@ program
   .description("Generate markdown documentation")
   .option("--codebase <name>", "Filter: lapack | cfs | all", "all")
   .action(docsCommand);
+
+program
+  .command("view <function>")
+  .description("View full source code of a function/subroutine")
+  .option("--codebase <name>", "Filter: lapack | cfs | all", "all")
+  .action(viewCommand);
 
 program
   .command("examples")
