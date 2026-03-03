@@ -1,6 +1,6 @@
 {
   "name": "@waits/legacylens",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "RAG-powered CLI for understanding legacy codebases (LAPACK + NASA cFS)",
   "type": "module",
   "bin": {
@@ -18,7 +18,14 @@
     "version": "changeset version",
     "release": "bun run build && changeset publish"
   },
-  "keywords": ["legacy-code", "rag", "lapack", "nasa", "cfs", "cli"],
+  "keywords": [
+    "legacy-code",
+    "rag",
+    "lapack",
+    "nasa",
+    "cfs",
+    "cli"
+  ],
   "author": "Ryan Waits",
   "license": "MIT",
   "dependencies": {
