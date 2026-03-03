@@ -57,6 +57,7 @@ program
   .command("view <function>")
   .description("View full source code of a function/subroutine")
   .option("--codebase <name>", "Filter: lapack | cfs | all", "all")
+  .option("--full", "Fetch full file from GitHub and highlight the chunk's line range")
   .action(viewCommand);
 
 program

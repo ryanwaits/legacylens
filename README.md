@@ -82,6 +82,14 @@ legacylens view DGESV --codebase lapack
 legacylens view CFE_ES_Main --codebase cfs
 ```
 
+Add `--full` to fetch the entire file from GitHub and highlight the chunk's line range in context:
+
+```bash
+legacylens view DGESV --codebase lapack --full
+```
+
+> **Note:** `--full` fetches from the `HEAD` branch, so line numbers may drift slightly from the ingested snapshot.
+
 ### `examples` — Quick reference
 
 Prints example queries for every command.
@@ -97,6 +105,7 @@ All query commands accept:
 | Flag | Values | Default | Description |
 |------|--------|---------|-------------|
 | `--codebase` | `lapack`, `cfs`, `all` | `all` | Filter to a specific codebase |
+| `--full` | — | off | Fetch full file from GitHub (`view` only) |
 
 ## How it works
 

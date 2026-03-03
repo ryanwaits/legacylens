@@ -25,6 +25,7 @@ ${chalk.bold("Docs")} — generate markdown documentation
 ${chalk.bold("View")} — view full source code of a function
   ${chalk.dim("$")} legacylens view DGESV --codebase lapack
   ${chalk.dim("$")} legacylens view CFE_ES_Main --codebase cfs
+  ${chalk.dim("$")} legacylens view DGESV --codebase lapack --full ${chalk.dim("# fetch full file from GitHub")}
 `.trimStart();
 
 export function examplesCommand(): void {
