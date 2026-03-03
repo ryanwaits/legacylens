@@ -1,6 +1,6 @@
 {
   "name": "@waits/legacylens",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "RAG-powered CLI for understanding legacy codebases (LAPACK + NASA cFS)",
   "type": "module",
   "bin": {
@@ -13,7 +13,10 @@
     "dev": "bun run src/cli.ts",
     "build": "bun build src/cli.ts --outdir dist --target node",
     "prepublishOnly": "bun run build",
-    "ingest": "bun run src/ingestion/ingest.ts"
+    "ingest": "bun run src/ingestion/ingest.ts",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "bun run build && changeset publish"
   },
   "keywords": ["legacy-code", "rag", "lapack", "nasa", "cfs", "cli"],
   "author": "Ryan Waits",
@@ -29,6 +32,7 @@
     "ora": "9.3.0"
   },
   "devDependencies": {
+    "@changesets/cli": "2.30.0",
     "@types/bun": "latest",
     "typescript": "^5"
   }
