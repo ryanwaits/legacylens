@@ -1,5 +1,11 @@
 # @waits/legacylens
 
+## 0.4.0
+
+### Minor Changes
+
+- Add --fast, --no-rerank, and --verbose flags for latency optimization. Responses now stream token-by-token in TTY mode. Rerank input capped at 10 chunks.
+
 ## 0.3.0
 
 ### Minor Changes
