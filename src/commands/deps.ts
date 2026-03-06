@@ -3,16 +3,21 @@ import { requireKeys } from "../config.ts";
 import { retrieve } from "../retrieval/pipeline.ts";
 import { keywordSearch } from "../db/client.ts";
 import { getSystemPrompt } from "../prompts.ts";
-import { streamResponse } from "../stream.ts";
+import { streamResponse, printVerboseStats, MODELS } from "../stream.ts";
 import { logQuery } from "../db/client.ts";
 import type { RetrievedChunk } from "../parsers/types.ts";
 
 export async function depsCommand(
   name: string,
-  options: { codebase?: string }
+  options: { codebase?: string },
+  command: { parent: { opts(): { fast?: boolean; rerank?: boolean; verbose?: boolean } } }
 ): Promise<void> {
   const { openaiKey, anthropicKey } = requireKeys();
   const codebase = options.codebase === "all" ? undefined : options.codebase;
+  const globalOpts = command.parent.opts();
+  const fast = globalOpts.fast ?? false;
+  const noRerank = globalOpts.rerank === false;
+  const verbose = globalOpts.verbose ?? false;
   const start = Date.now();
 
   const spinner = ora(`Mapping dependencies for ${name}...`).start();
@@ -45,10 +50,14 @@ export async function depsCommand(
   // Also get vector-searched related chunks
   const vectorChunks = await retrieve(
     `dependencies and call graph of ${name}`,
-    openaiKey,
-    anthropicKey,
-    codebase,
-    5
+    {
+      openaiKey,
+      anthropicKey,
+      codebase,
+      topK: 5,
+      noRerank,
+      rerankModel: fast ? MODELS.fast : undefined,
+    }
   );
 
   const seen = new Set(depChunks.map((c) => c.id));
@@ -59,21 +68,32 @@ export async function depsCommand(
     }
   }
 
+  const retrievalMs = Date.now() - start;
   spinner.succeed(`Found ${depChunks.length - 1} dependencies for ${name}`);
 
   const systemPrompt = getSystemPrompt("deps", options.codebase);
-  await streamResponse(
+  const result = await streamResponse(
     `Map the dependency tree and call graph for "${name}". Show what it calls and what calls it.`,
     systemPrompt,
     depChunks,
-    anthropicKey
+    {
+      anthropicKey,
+      model: fast ? MODELS.fast : undefined,
+      maxTokens: fast ? 2048 : undefined,
+    }
   );
+
+  const totalMs = Date.now() - start;
+
+  if (verbose) {
+    printVerboseStats(result, retrievalMs, totalMs, depChunks.length, { fast, noRerank });
+  }
 
   await logQuery({
     command: "deps",
     query_text: name,
     codebase_filter: options.codebase,
     chunks_retrieved: depChunks.length,
-    latency_ms: Date.now() - start,
+    latency_ms: totalMs,
   }).catch(() => {});
 }
