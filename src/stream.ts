@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import chalk from "chalk";
+import ora from "ora";
 import type { RetrievedChunk } from "./parsers/types.ts";
 import { renderMarkdown } from "./render.ts";
 
@@ -12,6 +13,7 @@ export interface StreamOptions {
   anthropicKey: string;
   model?: string;
   maxTokens?: number;
+  stream?: boolean;
 }
 
 export interface StreamResult {
@@ -29,7 +31,7 @@ export async function streamResponse(
   chunks: RetrievedChunk[],
   options: StreamOptions
 ): Promise<StreamResult> {
-  const { anthropicKey, model = MODELS.default, maxTokens = 4096 } = options;
+  const { anthropicKey, model = MODELS.default, maxTokens = 4096, stream: liveStream = false } = options;
   const client = new Anthropic({ apiKey: anthropicKey });
 
   const contextBlock = chunks
@@ -41,32 +43,35 @@ export async function streamResponse(
 
   const userMessage = `Here are the relevant code chunks:\n\n${contextBlock}\n\nQuery: ${query}`;
 
-  const isTTY = process.stdout.isTTY;
-
   let fullText = "";
   let firstToken = true;
   let timeToFirstToken = 0;
   const streamStart = Date.now();
 
-  if (isTTY) {
+  const isTTY = process.stdout.isTTY;
+  const showRawStream = liveStream && isTTY;
+
+  // Default: spinner. --stream: "Thinking..." on stderr
+  const spinner = !showRawStream ? ora("Generating response...").start() : null;
+  if (showRawStream) {
     process.stderr.write(chalk.dim("Thinking..."));
   }
 
-  const stream = await client.messages.stream({
+  const apiStream = await client.messages.stream({
     model,
     max_tokens: maxTokens,
     system: systemPrompt,
     messages: [{ role: "user", content: userMessage }],
   });
 
-  for await (const event of stream) {
+  for await (const event of apiStream) {
     if (
       event.type === "content_block_delta" &&
       event.delta.type === "text_delta"
     ) {
       if (firstToken) {
         timeToFirstToken = Date.now() - streamStart;
-        if (isTTY) {
+        if (showRawStream) {
           process.stderr.write("\r" + " ".repeat(20) + "\r");
         }
         firstToken = false;
@@ -74,7 +79,7 @@ export async function streamResponse(
 
       fullText += event.delta.text;
 
-      if (isTTY) {
+      if (showRawStream) {
         process.stdout.write(event.delta.text);
       }
     }
@@ -83,16 +88,21 @@ export async function streamResponse(
   const totalTime = Date.now() - streamStart;
 
   // Get usage from final message
-  const finalMessage = await stream.finalMessage();
+  const finalMessage = await apiStream.finalMessage();
   const inputTokens = finalMessage.usage?.input_tokens ?? 0;
   const outputTokens = finalMessage.usage?.output_tokens ?? 0;
 
-  if (isTTY) {
+  if (spinner) {
+    spinner.stop();
+  }
+
+  if (showRawStream) {
     if (firstToken) {
       process.stderr.write("\r" + " ".repeat(20) + "\r");
     }
     process.stdout.write("\n\n");
   } else {
+    // Buffered mode: render full markdown
     process.stdout.write(renderMarkdown(fullText));
   }
 
@@ -113,7 +123,7 @@ export function printVerboseStats(
   retrievalMs: number,
   totalMs: number,
   chunks: number,
-  flags: { fast?: boolean; noRerank?: boolean }
+  flags: { fast?: boolean; noRerank?: boolean; stream?: boolean }
 ): void {
   const lines = [
     "",
@@ -130,6 +140,7 @@ export function printVerboseStats(
   const activeFlags: string[] = [];
   if (flags.fast) activeFlags.push("--fast");
   if (flags.noRerank) activeFlags.push("--no-rerank");
+  if (flags.stream) activeFlags.push("--stream");
   if (activeFlags.length > 0) {
     lines.push(chalk.dim(`  Flags:            ${activeFlags.join(", ")}`));
   }

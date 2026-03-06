@@ -19,6 +19,7 @@ program
   .version("0.4.0")
   .option("--fast", "Use faster model (Haiku) for generation and reranking")
   .option("--no-rerank", "Skip LLM reranking for faster retrieval")
+  .option("--stream", "Stream tokens live instead of buffered rendering")
   .option("--verbose", "Show timing, model, and retrieval stats");
 
 program

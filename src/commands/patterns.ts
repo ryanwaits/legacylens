@@ -8,13 +8,14 @@ import { logQuery } from "../db/client.ts";
 export async function patternsCommand(
   description: string,
   options: { codebase?: string },
-  command: { parent: { opts(): { fast?: boolean; rerank?: boolean; verbose?: boolean } } }
+  command: { parent: { opts(): { fast?: boolean; rerank?: boolean; stream?: boolean; verbose?: boolean } } }
 ): Promise<void> {
   const { openaiKey, anthropicKey } = requireKeys();
   const codebase = options.codebase === "all" ? undefined : options.codebase;
   const globalOpts = command.parent.opts();
   const fast = globalOpts.fast ?? false;
   const noRerank = globalOpts.rerank === false;
+  const liveStream = globalOpts.stream ?? false;
   const verbose = globalOpts.verbose ?? false;
   const start = Date.now();
 
@@ -50,13 +51,14 @@ export async function patternsCommand(
       anthropicKey,
       model: fast ? MODELS.fast : undefined,
       maxTokens: fast ? 2048 : undefined,
+      stream: liveStream,
     }
   );
 
   const totalMs = Date.now() - start;
 
   if (verbose) {
-    printVerboseStats(result, retrievalMs, totalMs, chunks.length, { fast, noRerank });
+    printVerboseStats(result, retrievalMs, totalMs, chunks.length, { fast, noRerank, stream: liveStream });
   }
 
   await logQuery({
