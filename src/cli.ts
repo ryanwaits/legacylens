@@ -16,7 +16,10 @@ program
   .description(
     "RAG-powered CLI for understanding legacy codebases (LAPACK + NASA cFS)"
   )
-  .version("0.2.0");
+  .version("0.3.0")
+  .option("--fast", "Use faster model (Haiku) for generation and reranking")
+  .option("--no-rerank", "Skip LLM reranking for faster retrieval")
+  .option("--verbose", "Show timing, model, and retrieval stats");
 
 program
   .command("init")
