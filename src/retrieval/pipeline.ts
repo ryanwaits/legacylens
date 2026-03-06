@@ -3,13 +3,21 @@ import { embedSingle } from "../ingestion/embed.ts";
 import { rerank } from "./rerank.ts";
 import type { RetrievedChunk } from "../parsers/types.ts";
 
+export interface RetrieveOptions {
+  openaiKey: string;
+  anthropicKey: string;
+  codebase?: string;
+  topK?: number;
+  noRerank?: boolean;
+  rerankModel?: string;
+}
+
 export async function retrieve(
   query: string,
-  openaiKey: string,
-  anthropicKey: string,
-  codebase?: string,
-  topK: number = 5
+  options: RetrieveOptions
 ): Promise<RetrievedChunk[]> {
+  const { openaiKey, anthropicKey, codebase, topK = 5, noRerank, rerankModel } = options;
+
   // Embed query
   const queryEmbedding = await embedSingle(query, openaiKey);
 
@@ -40,8 +48,12 @@ export async function retrieve(
     (a, b) => (b.score || 0) - (a.score || 0)
   );
 
+  if (noRerank) {
+    return merged.slice(0, topK);
+  }
+
   // LLM rerank
-  const reranked = await rerank(query, merged, topK, anthropicKey);
+  const reranked = await rerank(query, merged, topK, anthropicKey, rerankModel);
 
   return reranked;
 }

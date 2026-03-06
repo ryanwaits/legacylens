@@ -5,9 +5,13 @@ export async function rerank(
   query: string,
   chunks: RetrievedChunk[],
   topK: number,
-  apiKey: string
+  apiKey: string,
+  model?: string
 ): Promise<RetrievedChunk[]> {
   if (chunks.length <= topK) return chunks;
+
+  // Cap rerank input at 10 chunks
+  chunks = chunks.slice(0, 10);
 
   const client = new Anthropic({ apiKey });
 
@@ -21,7 +25,7 @@ export async function rerank(
 
   try {
     const response = await client.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: model || "claude-sonnet-4-20250514",
       max_tokens: 1024,
       messages: [
         {
@@ -50,7 +54,7 @@ Return ONLY a JSON array of objects with "index" and "score" (0-10) fields, sort
       .map((s) => {
         const chunk = chunks[s.index];
         if (!chunk) return null;
-        return { ...chunk, score: s.score };
+        return { ...chunk, score: s.score } as RetrievedChunk;
       })
       .filter((c): c is RetrievedChunk => c !== null);
   } catch {
