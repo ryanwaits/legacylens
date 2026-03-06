@@ -108,6 +108,7 @@ All commands accept these global flags:
 | `--full` | — | off | Fetch full file from GitHub (`view` only) |
 | `--fast` | — | off | Use a faster model (Haiku) for generation and reranking. Reduces latency significantly |
 | `--no-rerank` | — | off | Skip the LLM reranking step for faster retrieval |
+| `--stream` | — | off | Stream tokens live instead of buffered rendering |
 | `--verbose` | — | off | Show timing, model, and retrieval stats after the response |
 
 ### Performance flags
@@ -118,7 +119,8 @@ Combine `--fast` and `--no-rerank` for maximum speed at the cost of some accurac
 legacylens --fast query "what is DGEMM"
 legacylens --no-rerank explain DGEMM
 legacylens --verbose --fast query "what is DGEMM"
-legacylens --fast --no-rerank query "what is DGEMM"
+legacylens --stream query "what is DGEMM"
+legacylens --fast --no-rerank --stream query "what is DGEMM"
 ```
 
 `--verbose` prints a stats block after the response: retrieval time, time to first token, generation time, total time, token counts, and active flags.
@@ -127,7 +129,7 @@ legacylens --fast --no-rerank query "what is DGEMM"
 
 1. **Hybrid retrieval** — parallel vector similarity + keyword search against Supabase
 2. **LLM reranking** — Claude scores and selects the most relevant code chunks
-3. **Streaming generation** — responses stream token-by-token in TTY mode instead of buffering behind a spinner
+3. **Buffered generation** — responses are buffered with a spinner and rendered with syntax highlighting by default. Use `--stream` for live token-by-token output (raw markdown, no highlighting)
 4. **Rich rendering** — syntax-highlighted code, styled tables, colored headers in your terminal
 5. **Relevance scores** — each source citation shows its relevance rating (0-10)
 
