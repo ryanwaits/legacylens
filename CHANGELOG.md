@@ -1,5 +1,11 @@
 # @waits/legacylens
 
+## 0.4.1
+
+### Patch Changes
+
+- Make streaming opt-in via --stream flag, restore buffered rendered markdown as default output
+
 ## 0.4.0
 
 ### Minor Changes
