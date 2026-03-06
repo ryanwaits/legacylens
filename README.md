@@ -100,18 +100,34 @@ legacylens examples
 
 ## Options
 
-All query commands accept:
+All commands accept these global flags:
 
 | Flag | Values | Default | Description |
 |------|--------|---------|-------------|
 | `--codebase` | `lapack`, `cfs`, `all` | `all` | Filter to a specific codebase |
 | `--full` | — | off | Fetch full file from GitHub (`view` only) |
+| `--fast` | — | off | Use a faster model (Haiku) for generation and reranking. Reduces latency significantly |
+| `--no-rerank` | — | off | Skip the LLM reranking step for faster retrieval |
+| `--verbose` | — | off | Show timing, model, and retrieval stats after the response |
+
+### Performance flags
+
+Combine `--fast` and `--no-rerank` for maximum speed at the cost of some accuracy:
+
+```bash
+legacylens --fast query "what is DGEMM"
+legacylens --no-rerank explain DGEMM
+legacylens --verbose --fast query "what is DGEMM"
+legacylens --fast --no-rerank query "what is DGEMM"
+```
+
+`--verbose` prints a stats block after the response: retrieval time, time to first token, generation time, total time, token counts, and active flags.
 
 ## How it works
 
 1. **Hybrid retrieval** — parallel vector similarity + keyword search against Supabase
 2. **LLM reranking** — Claude scores and selects the most relevant code chunks
-3. **Structured generation** — Claude generates formatted responses with source citations
+3. **Streaming generation** — responses stream token-by-token in TTY mode instead of buffering behind a spinner
 4. **Rich rendering** — syntax-highlighted code, styled tables, colored headers in your terminal
 5. **Relevance scores** — each source citation shows its relevance rating (0-10)
 
